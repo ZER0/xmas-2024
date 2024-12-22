@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
+        <style>
+            @import url("https://fonts.googleapis.com/css?family=Roboto+Condensed&amp;subset=latin-ext");
+            * {
+                box-sizing: border-box;
+            }
+
+            footer {
+                color: #fff;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                overflow: hidden;
+                font-family: "Roboto Condensed";
+                font-size: 16px;
+                text-align: center;
+                padding: 0.5em;
+                text-shadow:
+                    -1px -1px 1px #000,
+                    1px -1px 1px #000,
+                    -1px 1px 1px #000,
+                    1px 1px 1px #000;
+            }
+
+            address {
+                font-style: normal;
+            }
+
+            footer a {
+                color: #f4c8a3;
+                text-decoration: none;
+            }
+
+            #snowCanvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
+
+            body {
+                background-color: #928a97;
+                background-image: url("https://images.pexels.com/photos/257909/pexels-photo-257909.jpeg?fit=crop&w=1920&h=1280");
+                background-repeat: no-repeat;
+                background-size: cover;
+                height: 100dvh;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /*
+               -- CHANGES HERE --
+               We swap width/height to give the card a landscape orientation:
+               from 350x500 => 500x350
+            */
+            .card {
+                perspective: 1500px;
+                position: absolute;
+                transition-property: transform;
+                transition-duration: 1.5s;
+                transition-timing-function: cubic-bezier(
+                    0.68,
+                    -0.55,
+                    0.265,
+                    1.55
+                );
+                transition-delay: initial;
+                transform: rotate(-7deg) translate(0, 0);
+                animation: cardIn 2.5s alternate
+                    cubic-bezier(0.87, -0.41, 0.19, 1.44);
+            }
+
+            .card.is-opened {
+                transform: rotate(0deg) translate(0, 50%);
+            }
+
+            .cart-page-front {
+                transform-origin: top center;
+                transform: rotateX(20deg);
+            }
+            .card.is-opened .cart-page-front {
+                transition-duration: 2.5s;
+                transform: rotateX(180deg);
+            }
+
+            @keyframes cardIn {
+                0% {
+                    opacity: 0;
+                    transform: rotate(-27deg) translate(0, -200%);
+                }
+
+                55% {
+                    opacity: 0.9;
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: rotate(-7deg) translate(0, 0);
+                }
+            }
+
+            @media (orientation: landscape) {
+                .card,
+                .card-page {
+                    width: calc((50dvh - 2em) * 1.4);
+                    height: calc(50dvh - 2em);
+                }
+            }
+
+            @media (orientation: portrait) {
+                .card,
+                .card-page {
+                    width: calc((44dvh - 2em) * 1.4);
+                    height: calc(44dvh - 2em);
+                }
+            }
+
+            .card-page {
+                transition: transform 1s ease-in-out;
+                cursor: pointer;
+                position: absolute;
+            }
+
+            .cart-page-front {
+                transform-style: preserve-3d;
+                z-index: 2;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .cart-page-outside,
+            .cart-page-inside {
+                position: absolute;
+                -webkit-backface-visibility: hidden;
+            }
+
+            .cart-page-outside {
+                background: #c72320 url("./i/front.jpg") no-repeat center;
+                background-size: cover;
+                width: 100%;
+                height: 100%;
+            }
+
+            .cart-page-inside,
+            .cart-page-bottom {
+                background-size: cover, cover !important;
+            }
+
+            .cart-page-inside {
+                background:
+                    linear-gradient(
+                        to bottom,
+                        rgba(0, 0, 0, 0.65),
+                        transparent 7%
+                    ),
+                    url("./i/front-inside.jpg") no-repeat;
+            }
+
+            .cart-page-bottom {
+                background:
+                    linear-gradient(
+                        to bottom,
+                        rgba(0, 0, 0, 0.65),
+                        transparent 7%
+                    ),
+                    url("./i/inside.jpg") no-repeat;
+            }
+
+            .cart-page-inside {
+                transform: rotateY(-180deg);
+            }
+
+            .cart-page-bottom {
+                z-index: 1;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .click-icon {
+                position: absolute;
+                left: 50%;
+                transform: translate(-50%, 0);
+
+                animation: iconAnimation 1s infinite alternate ease-in-out;
+                transition: opacity 0.3s ease-in-out;
+                opacity: 1;
+                pointer-events: none;
+            }
+            .click-icon svg {
+                width: 96px;
+                height: 96px;
+            }
+
+            .click-icon.is-hidden {
+                opacity: 0;
+            }
+
+            @keyframes iconAnimation {
+                0% {
+                    transform: translate(-50%, 0);
+                }
+                100% {
+                    transform: translate(-50%, 10px);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <audio src="./a/jb.mp3" autoplay loop></audio>
+
+        <div class="card">
+            <div class="card-page cart-page-front">
+                <div class="card-page cart-page-outside"></div>
+                <div class="card-page cart-page-inside"></div>
+            </div>
+            <div class="card-page cart-page-bottom"></div>
+        </div>
+
+        <span class="click-icon is-hidden">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    fill="#fff"
+                    d="M31.6 17.7V26c0 1.9-.7 3.7-2 5.1v.9c0 1.6-1.3 3-3 3h-8.4c-1.6 0-3-1.3-3-3 0-.6.5-1 1-1s1 .4 1 1c0 .5.4 1 1 1h8.4c.5 0 1-.4 1-1v-1.2-.3-.1c0-.1.1-.2.2-.3 1.1-1.1 1.7-2.5 1.7-4v-8.3c0-.3-.1-.5-.3-.7-.1-.1-.5-.4-1-.3-.4.1-.8.6-.8 1.1v2.4c0 .6-.5 1-1 1s-1-.4-1-1v-5.5c0-.3-.1-.5-.3-.7s-.4-.3-.7-.3c-.5 0-1 .5-1 1v5.5c0 .6-.5 1-1 1s-1-.4-1-1v-8.5c0-.3-.1-.5-.3-.7s-.4-.3-.7-.3c-.5 0-1 .5-1 1v8.5c0 .6-.5 1-1 1s-1-.4-1-1V7.7c0-.3-.1-.5-.3-.7-.1-.1-.5-.4-1-.3-.4.1-.8.6-.8 1.1V20c0 .4-.2.8-.6.9-.4.2-.8.1-1.1-.2L11 18.1c-.6-.6-1.6-.6-2.2.1-.5.6-.4 1.5.2 2.1l7 7c.4.4.4 1 0 1.4-.2.2-.5.3-.7.3-.3 0-.5-.1-.7-.3l-7-7.1c-1.3-1.3-1.5-3.5-.3-4.8C8 16 9 15.5 10 15.5c.9 0 1.8.4 2.5 1l.9.9V7.9c0-1.4.9-2.7 2.3-3 1-.3 2.1 0 2.8.8.6.6.9 1.3.9 2.1V9c.3-.1.7-.2 1-.2.8 0 1.5.3 2.1.9s.9 1.3.9 2.1v.2c.3-.1.7-.2 1-.2.8 0 1.5.3 2.1.9s.9 1.3.9 2.1v.2c.1 0 .2-.1.3-.1 1-.3 2.1 0 2.8.8.8.5 1.1 1.3 1.1 2z"
+                />
+            </svg>
+        </span>
+
+        <canvas id="snowCanvas"></canvas>
+
+        <footer>
+            <address>
+                Photos by
+                <a
+                    href="https://www.instagram.com/veronicasorace/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Veronica Sorace
+                </a>
+                , Music by
+                <a
+                    href="https://pixabay.com/users/music_for_video-22579021/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Music For Video
+                </a>
+            </address>
+        </footer>
+
+        <script>
+            const clickMe = document.querySelector(".click-icon");
+            const card = document.querySelector(".card");
+
+            // When the card animation ends...
+            card.addEventListener(
+                "animationend",
+                () => {
+                    // Show the click icon
+                    clickMe.classList.toggle("is-hidden");
+
+                    // And add the `click` event listener to the card
+                    card.addEventListener(
+                        "click",
+                        () => {
+                            // To play the music
+                            document.querySelector("audio").play();
+                            // And open the card
+                            card.classList.toggle("is-opened");
+                            // And hide the click icon
+                            clickMe.classList.toggle("is-hidden");
+                            // And enable the snow
+                            document.getElementById(
+                                "snowCanvas",
+                            ).style.pointerEvents = "auto";
+                        },
+                        { once: true },
+                    );
+                },
+                { once: true },
+            );
+        </script>
+        <script>
+            const canvas = document.getElementById("snowCanvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const snowflakes = [];
+            const fallingImages = [];
+            let cardOpened = false;
+            const preLoadedImages = [];
+
+            for (let i = 0; i < 16; i++) {
+                const img = new Image();
+                const p = new Promise((resolve, reject) => {
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                });
+
+                img.src = `./i/${i}.jpg`;
+                preLoadedImages.push(p);
+            }
+
+            const ground = []; // Array to represent the snow accumulation at the bottom
+            const groundHeight = 20; // The height of the accumulated snow area
+            let maxGroundHeight = canvas.height;
+
+            function createSnowflakes(count) {
+                for (let i = 0; i < count; i++) {
+                    snowflakes.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 3 + 1,
+                        speed: Math.random() * 1 + 0.5,
+                        blur: Math.random() * 3,
+                    });
+                }
+            }
+
+            async function createFallingImages(count) {
+                const loadedImages = await Promise.all(preLoadedImages);
+
+                for (let i = 0; i < count; i++) {
+                    const index = i % loadedImages.length;
+                    const img = loadedImages[index];
+                    const ratio = 1.5;
+                    const rotationSpeed = Math.random() * 1.2 + 1;
+
+                    fallingImages.push({
+                        x: Math.random() * canvas.width,
+                        y: -Math.random() * 200 - 50,
+                        img,
+                        ratio,
+                        width: 50,
+                        height: 75,
+                        speed: Math.random() * 2 + 0.5,
+                        hover: false,
+                        scale: 1,
+                        targetScale: 1,
+                        rotation: Math.random() * 360,
+                        initialRotationSpeed: rotationSpeed,
+                        activeRotationSpeed: rotationSpeed,
+                        falling: false,
+                        borderWidth: 4, // White border width
+                        zIndex: 0, // Default z-index
+                    });
+                }
+            }
+
+            function drawSnowflakes() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.beginPath();
+                snowflakes.forEach((flake) => {
+                    ctx.filter = `blur(${flake.blur}px)`; // Apply blur only to snowflakes
+                    ctx.moveTo(flake.x, flake.y);
+                    ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                });
+                ctx.fill();
+                ctx.filter = "none"; // Reset filter for other elements
+            }
+
+            function drawFallingImages() {
+                // Sort images by zIndex to ensure the hovered one is drawn last
+                fallingImages.sort((a, b) => a.zIndex - b.zIndex);
+
+                fallingImages.forEach((item) => {
+                    if (!item.falling) return;
+
+                    item.scale += (item.targetScale - item.scale) * 0.1;
+
+                    // Apply global slowdown factor for non-hovered images
+                    const rotationSlowdown = item.hover
+                        ? 1
+                        : globalSlowDownFactor;
+                    item.rotation +=
+                        item.activeRotationSpeed * rotationSlowdown;
+
+                    ctx.save();
+
+                    let x = item.x + (item.width * item.scale) / 2;
+                    let y = item.y + (item.height * item.scale) / 2;
+
+                    // If the image is hovered, ensure it stays within the viewport
+                    if (item.hover) {
+                        const viewportMargin = 20; // Margin from the edges of the viewport
+                        const zoomedWidth = item.width * item.scale;
+                        const zoomedHeight = item.height * item.scale;
+
+                        // Adjust x-coordinate to keep the image within the viewport
+                        if (x - zoomedWidth / 2 < viewportMargin) {
+                            x = viewportMargin + zoomedWidth / 2;
+                        }
+                        if (
+                            x + zoomedWidth / 2 >
+                            canvas.width - viewportMargin
+                        ) {
+                            x = canvas.width - viewportMargin - zoomedWidth / 2;
+                        }
+
+                        // Adjust y-coordinate to keep the image within the viewport
+                        if (y - zoomedHeight / 2 < viewportMargin) {
+                            y = viewportMargin + zoomedHeight / 2;
+                        }
+                        if (
+                            y + zoomedHeight / 2 >
+                            canvas.height - viewportMargin
+                        ) {
+                            y =
+                                canvas.height -
+                                viewportMargin -
+                                zoomedHeight / 2;
+                        }
+                    }
+
+                    ctx.translate(x, y);
+                    ctx.scale(item.scale, item.scale);
+                    ctx.rotate((item.rotation * Math.PI) / 180);
+
+                    ctx.shadowColor = "lightblue";
+                    ctx.shadowBlur = 20;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+
+                    // Draw the white border
+                    const borderOffset = item.borderWidth; // Keep the original border size
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(
+                        -item.width / 2 - borderOffset,
+                        -item.height / 2 - borderOffset,
+                        item.width + 2 * borderOffset,
+                        item.height + 2 * borderOffset,
+                    );
+
+                    ctx.shadowBlur = 0;
+
+                    // Draw the image
+                    ctx.drawImage(
+                        item.img,
+                        -item.width / 2,
+                        -item.height / 2,
+                        item.width,
+                        item.height,
+                    );
+
+                    ctx.restore();
+                });
+            }
+            function animateSnowflakes(speedFactor = 1) {
+                snowflakes.forEach((flake) => {
+                    flake.y += flake.speed * speedFactor;
+
+                    // If snowflake reaches the bottom or touches the "ground"
+                    if (flake.y > maxGroundHeight) {
+                        // Add the flake to the ground
+                        ground.push({
+                            x: flake.x,
+                            radius: flake.radius,
+                        });
+
+                        // Reset the snowflake to fall again
+                        flake.y = -flake.radius;
+                        flake.x = Math.random() * canvas.width;
+                    }
+                });
+            }
+
+            function animateFallingImages(speedFactor = 1) {
+                fallingImages.forEach((item) => {
+                    if (!item.falling) return;
+
+                    item.y += item.speed * speedFactor;
+                    if (item.y > canvas.height) {
+                        item.y = -50;
+                        item.x = Math.random() * canvas.width;
+                    }
+                });
+            }
+
+            function drawGround() {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                ground.forEach((flake) => {
+                    ctx.beginPath();
+                    ctx.arc(
+                        flake.x,
+                        maxGroundHeight + flake.radius / 2,
+                        flake.radius,
+                        0,
+                        Math.PI * 2,
+                    );
+                    ctx.fill();
+                });
+
+                // Adjust the height of the ground as snow accumulates
+                if (ground.length > 0) {
+                    const avgRadius =
+                        ground.reduce((sum, f) => sum + f.radius, 0) /
+                        ground.length;
+                    maxGroundHeight -= avgRadius * 0.001; // Raise the ground slightly
+                }
+
+                ctx.fillStyle = "rgba(255, 255, 255, 1)";
+                ctx.fillRect(0, maxGroundHeight, canvas.width, canvas.height);
+            }
+
+            function detectHover(mouseX, mouseY) {
+                let hovering = false;
+
+                fallingImages.forEach((item, index) => {
+                    if (!item.falling) return;
+
+                    const imgLeft = item.x;
+                    const imgRight = item.x + item.width * item.scale;
+                    const imgTop = item.y;
+                    const imgBottom = item.y + item.height * item.scale;
+
+                    if (
+                        mouseX >= imgLeft &&
+                        mouseX <= imgRight &&
+                        mouseY >= imgTop &&
+                        mouseY <= imgBottom
+                    ) {
+                        item.hover = true;
+                        item.targetScale = 5;
+                        item.activeRotationSpeed = 0;
+                        item.zIndex = 100; // Bring hovered image to front
+                        hovering = true;
+                    } else {
+                        item.hover = false;
+                        item.targetScale = 1;
+                        item.activeRotationSpeed = item.initialRotationSpeed;
+                        item.zIndex = 0; // Reset zIndex for non-hovered images
+                    }
+                });
+
+                // Apply global slowdown for other images if hovering
+                globalSlowDownFactor = hovering ? 0.1 : 1;
+            }
+
+            let globalSlowDownFactor = 1;
+
+            function snowfall() {
+                drawSnowflakes();
+                if (card.classList.contains("is-opened")) {
+                    cardOpened = true;
+                    setTimeout(() => {
+                        fallingImages.forEach((item) => (item.falling = true));
+                    }, 3000);
+                    drawFallingImages();
+                    animateFallingImages(globalSlowDownFactor);
+                }
+                animateSnowflakes(globalSlowDownFactor);
+                drawGround();
+                requestAnimationFrame(snowfall);
+            }
+
+            canvas.addEventListener("mousemove", (event) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                detectHover(mouseX, mouseY);
+            });
+
+            createSnowflakes(100);
+            createFallingImages(17).then(snowfall);
+
+            window.addEventListener("resize", () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                maxGroundHeight = canvas.height - groundHeight;
+            });
+        </script>
+    </body>
+</html>
